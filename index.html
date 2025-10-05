@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Professional Resume Builder</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, skyblue 100%);
+        color: #333;
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 20px;
+      }
+
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+        width: 100%;
+      }
+
+      h1 {
+        color: white;
+        font-size: 2.8rem;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Glassmorphism Card Design */
+      .card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 25px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        color: white;
+      }
+
+      .builder-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .preview-panel {
+        display: flex;
+        flex-direction: column;
+      }
+
+      h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: white;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        padding-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 1.4rem;
+        margin: 15px 0 10px;
+        color: white;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 12px 15px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.85);
+        color: #333;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 1);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+      }
+
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-primary {
+        background: #4a6fa5;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #3a5a80;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #6e9887;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #5a7c6f;
+        transform: translateY(-2px);
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      /* Resume Preview Styling */
+      .resume-preview {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        min-height: 600px;
+        color: #333;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        transform: scale(0.9);
+        transform-origin: top center;
+      }
+
+      .resume-header {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      .resume-name {
+        font-size: 28px;
+        color: #4a6fa5;
+        margin-bottom: 5px;
+      }
+
+      .resume-title {
+        font-size: 18px;
+        color: #6e9887;
+        margin-bottom: 15px;
+      }
+
+      .resume-contact {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 10px;
+        font-size: 15px;
+      }
+
+      .resume-section {
+        margin-bottom: 20px;
+      }
+
+      .resume-section-title {
+        font-size: 20px;
+        color: #4a6fa5;
+        border-bottom: 2px solid #6e9887;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+      }
+
+      .experience-item,
+      .education-item {
+        margin-bottom: 15px;
+      }
+
+      .item-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .item-subheader {
+        display: flex;
+        justify-content: space-between;
+        color: #666;
+        font-style: italic;
+        margin-bottom: 8px;
+      }
+
+      .skills-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .skill-pill {
+        background: #4a6fa5;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+
+      /* Toggle Switch */
+      .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .toggle-text {
+        color: white;
+        font-weight: 500;
+      }
+
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: #4a6fa5;
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(30px);
+      }
+
+      /* Toast Notification */
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .toast-success {
+        border-left: 4px solid #27ae60;
+      }
+
+      /* Icons */
+      .icon {
+        font-size: 18px;
+      }
+
+      /* Loading overlay for PDF generation */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        color: white;
+        font-size: 24px;
+        gap: 20px;
+        display: none;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #4a6fa5;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="spinner"></div>
+      <p>Generating PDF...</p>
+    </div>
+
+    <header>
+      <h1>Professional Resume Builder</h1>
+      <p class="subtitle">
+        Create a stunning resume with our glassmorphism design. Download as PDF
+        or print directly.
+      </p>
+    </header>
+
+    <div class="container">
+      <div class="builder-panel card">
+        <h2>Resume Details</h2>
+
+        <div class="toggle-container">
+          <span class="toggle-text">Edit Mode</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="edit-mode" checked />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-text">Live Preview</span>
+        </div>
+
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            placeholder="John Doe"
+            value="John Doe"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="title">Professional Title</label>
+          <input
+            type="text"
+            id="title"
+            placeholder="Software Engineer"
+            value="Senior Software Engineer"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="john.doe@example.com"
+            value="john.doe@example.com"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input
+            type="tel"
+            id="phone"
+            placeholder="(123) 456-7890"
+            value="(555) 123-4567"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input
+            type="text"
+            id="location"
+            placeholder="City, Country"
+            value="San Francisco, CA"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="summary">Professional Summary</label>
+          <textarea
+            id="summary"
+            placeholder="Brief summary of your professional background"
+          >
+Experienced software engineer with 5+ years of expertise in developing scalable web applications. Skilled in JavaScript, React, Node.js, and cloud technologies. Passionate about clean code and agile methodologies.</textarea
+          >
+        </div>
+
+        <h3>Work Experience</h3>
+
+        <div class="form-group">
+          <label for="job-title">Job Title</label>
+          <input
+            type="text"
+            id="job-title"
+            placeholder="Senior Software Developer"
+            value="Senior Software Developer"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="company">Company</label>
+          <input
+            type="text"
+            id="company"
+            placeholder="Company Name"
+            value="Tech Innovations Inc."
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="job-date">Date Range</label>
+          <input
+            type="text"
+            id="job-date"
+            placeholder="Jan 2020 - Present"
+            value="Jan 2020 - Present"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="job-description">Job Description</label>
+          <textarea
+            id="job-description"
+            placeholder="Describe your responsibilities and achievements"
+          >
+- Led a team of 5 developers to deliver a new SaaS product
+- Improved application performance by 40% through code optimization
+- Implemented CI/CD pipeline reducing deployment time by 60%</textarea
+          >
+        </div>
+
+        <h3>Education</h3>
+
+        <div class="form-group">
+          <label for="degree">Degree</label>
+          <input
+            type="text"
+            id="degree"
+            placeholder="Bachelor of Science in Computer Science"
+            value="Master of Science in Computer Science"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="school">School</label>
+          <input
+            type="text"
+            id="school"
+            placeholder="University Name"
+            value="Stanford University"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="education-date">Date Range</label>
+          <input
+            type="text"
+            id="education-date"
+            placeholder="2013 - 2017"
+            value="2014 - 2016"
+          />
+        </div>
+
+        <h3>Skills</h3>
+
+        <div class="form-group">
+          <label for="skills">Skills (comma separated)</label>
+          <input
+            type="text"
+            id="skills"
+            placeholder="JavaScript, React, Node.js, Python"
+            value="JavaScript, React, Node.js, Python, AWS, Docker, Kubernetes, CI/CD"
+          />
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn btn-primary" id="download-pdf">
+            <i class="fas fa-download"></i> Download PDF
+          </button>
+          <button class="btn btn-secondary" id="print-resume">
+            <i class="fas fa-print"></i> Print Resume
+          </button>
+        </div>
+      </div>
+
+      <div class="preview-panel card">
+        <h2>Resume Preview</h2>
+        <div class="resume-preview" id="resume-preview">
+          <!-- Resume content will be generated here -->
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">
+      <i class="fas fa-check-circle" style="color: #27ae60"></i>
+      <span id="toast-message">Resume downloaded successfully!</span>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Get DOM elements
+        const editModeToggle = document.getElementById("edit-mode");
+        const resumePreview = document.getElementById("resume-preview");
+        const downloadBtn = document.getElementById("download-pdf");
+        const printBtn = document.getElementById("print-resume");
+        const toast = document.getElementById("toast");
+        const loadingOverlay = document.getElementById("loading-overlay");
+
+        // Get all input fields
+        const inputFields = {
+          name: document.getElementById("name"),
+          title: document.getElementById("title"),
+          email: document.getElementById("email"),
+          phone: document.getElementById("phone"),
+          location: document.getElementById("location"),
+          summary: document.getElementById("summary"),
+          jobTitle: document.getElementById("job-title"),
+          company: document.getElementById("company"),
+          jobDate: document.getElementById("job-date"),
+          jobDescription: document.getElementById("job-description"),
+          degree: document.getElementById("degree"),
+          school: document.getElementById("school"),
+          educationDate: document.getElementById("education-date"),
+          skills: document.getElementById("skills"),
+        };
+
+        // Initialize resume preview
+        updateResumePreview();
+
+        // Set up event listeners for all input fields
+        Object.values(inputFields).forEach((field) => {
+          field.addEventListener("input", updateResumePreview);
+        });
+
+        // Set up edit mode toggle
+        editModeToggle.addEventListener("change", function () {
+          Object.values(inputFields).forEach((field) => {
+            field.disabled = !this.checked;
+          });
+        });
+
+        // Set up download button
+        downloadBtn.addEventListener("click", downloadPDF);
+
+        // Set up print button
+        printBtn.addEventListener("click", printResume);
+
+        // Function to update resume preview
+        function updateResumePreview() {
+          const skillsArray = inputFields.skills.value
+            .split(",")
+            .map((skill) => skill.trim());
+
+          resumePreview.innerHTML = `
+                    <div class="resume-header">
+                        <h1 class="resume-name">${inputFields.name.value}</h1>
+                        <div class="resume-title">${
+                          inputFields.title.value
+                        }</div>
+                        <div class="resume-contact">
+                            <span><i class="fas fa-envelope"></i> ${
+                              inputFields.email.value
+                            }</span>
+                            <span><i class="fas fa-phone"></i> ${
+                              inputFields.phone.value
+                            }</span>
+                            <span><i class="fas fa-map-marker-alt"></i> ${
+                              inputFields.location.value
+                            }</span>
+                        </div>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <h2 class="resume-section-title">Professional Summary</h2>
+                        <p>${inputFields.summary.value}</p>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <h2 class="resume-section-title">Work Experience</h2>
+                        <div class="experience-item">
+                            <div class="item-header">
+                                <span>${inputFields.jobTitle.value}</span>
+                            </div>
+                            <div class="item-subheader">
+                                <span>${inputFields.company.value}</span>
+                                <span>${inputFields.jobDate.value}</span>
+                            </div>
+                            <p>${inputFields.jobDescription.value.replace(
+                              /\n/g,
+                              "<br>"
+                            )}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <h2 class="resume-section-title">Education</h2>
+                        <div class="education-item">
+                            <div class="item-header">
+                                <span>${inputFields.degree.value}</span>
+                            </div>
+                            <div class="item-subheader">
+                                <span>${inputFields.school.value}</span>
+                                <span>${inputFields.educationDate.value}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <h2 class="resume-section-title">Skills</h2>
+                        <div class="skills-list">
+                            ${skillsArray
+                              .map(
+                                (skill) =>
+                                  `<div class="skill-pill">${skill}</div>`
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                `;
+        }
+
+        // Function to download PDF
+        function downloadPDF() {
+          loadingOverlay.style.display = "flex";
+
+          // Use setTimeout to allow the loading overlay to render
+          setTimeout(() => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF("p", "mm", "a4");
+
+            // Use html2canvas to capture the resume preview
+            html2canvas(resumePreview, {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+            })
+              .then((canvas) => {
+                const imgData = canvas.toDataURL("image/jpeg", 1.0);
+                const imgWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                // Add first page
+                doc.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                // Add additional pages if needed
+                while (heightLeft >= 0) {
+                  position = heightLeft - imgHeight;
+                  doc.addPage();
+                  doc.addImage(
+                    imgData,
+                    "JPEG",
+                    0,
+                    position,
+                    imgWidth,
+                    imgHeight
+                  );
+                  heightLeft -= pageHeight;
+                }
+
+                // Save the PDF
+                doc.save(
+                  `${inputFields.name.value.replace(/\s+/g, "_")}_Resume.pdf`
+                );
+
+                // Hide loading overlay
+                loadingOverlay.style.display = "none";
+
+                showToast("Resume downloaded successfully!");
+              })
+              .catch((error) => {
+                console.error("Error generating PDF:", error);
+                loadingOverlay.style.display = "none";
+                showToast("Error generating PDF. Please try again.");
+              });
+          }, 100);
+        }
+
+        // Function to print resume
+        function printResume() {
+          const originalContents = document.body.innerHTML;
+          const printContents = resumePreview.innerHTML;
+
+          document.body.innerHTML = `
+                    <div style="padding: 40px; max-width: 800px; margin: 0 auto;">
+                        ${printContents}
+                    </div>
+                    <button onclick="window.location.reload()" style="position: fixed; top: 20px; right: 20px; padding: 10px 15px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Close Print
+                    </button>
+                `;
+
+          window.print();
+
+          // Delay restoring content to ensure print dialog appears
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }
+
+        // Function to show toast notification
+        function showToast(message) {
+          const toastMessage = document.getElementById("toast-message");
+          toastMessage.textContent = message;
+
+          toast.classList.add("show");
+
+          setTimeout(() => {
+            toast.classList.remove("show");
+          }, 3000);
+        }
+      });
+    </script>
+  </body>
+</html>
